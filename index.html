@@ -1,0 +1,1681 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>자린고비 - 2030 청년층 절약 플랫폼 | 결과보고서</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Noto+Sans+KR:wght@300;400;500;700;900&family=Jua&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --beige: #F5EFE0;
+    --cream: #FAF5E8;
+    --green-deep: #5C7C5A;
+    --green: #8FA889;
+    --green-light: #BFCFB5;
+    --brown: #6B4F3A;
+    --brown-dark: #3E2C1C;
+    --yellow: #E8C547;
+    --pink: #F4B9B0;
+    --heart: #E89B95;
+    --wood: #8B5E3C;
+    --wood-light: #B07C4F;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font-family: 'Gowun Dodum', 'Noto Sans KR', sans-serif;
+    background: #2a2a2a;
+    color: var(--brown-dark);
+  }
+
+  .deck {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--beige);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.6s ease, transform 0.7s cubic-bezier(0.65, 0, 0.35, 1);
+    transform: translateX(60px) scale(0.98);
+    overflow: hidden;
+    padding: 4vh 5vw;
+  }
+  .slide.active {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+    pointer-events: auto;
+    z-index: 2;
+  }
+  .slide.prev {
+    transform: translateX(-60px) scale(0.98);
+  }
+
+  /* Slide animation variants */
+  .slide.fx-fade.active .anim { animation: fadeUp 0.9s 0.2s both; }
+  .slide.fx-zoom.active .anim { animation: zoomIn 0.8s 0.15s both; }
+  .slide.fx-slide.active .anim { animation: slideIn 0.8s 0.15s both; }
+  .slide.fx-flip.active .anim { animation: flipIn 0.9s 0.15s both; }
+
+  .stagger > * { opacity: 0; animation: fadeUp 0.7s both; }
+  .slide.active .stagger > *:nth-child(1) { animation-delay: 0.25s; opacity: 1; }
+  .slide.active .stagger > *:nth-child(2) { animation-delay: 0.40s; opacity: 1; }
+  .slide.active .stagger > *:nth-child(3) { animation-delay: 0.55s; opacity: 1; }
+  .slide.active .stagger > *:nth-child(4) { animation-delay: 0.70s; opacity: 1; }
+  .slide.active .stagger > *:nth-child(5) { animation-delay: 0.85s; opacity: 1; }
+  .slide.active .stagger > *:nth-child(6) { animation-delay: 1.00s; opacity: 1; }
+  .slide.active .stagger > *:nth-child(7) { animation-delay: 1.15s; opacity: 1; }
+  .slide.active .stagger > *:nth-child(8) { animation-delay: 1.30s; opacity: 1; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes zoomIn {
+    from { opacity: 0; transform: scale(0.85); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(-40px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes flipIn {
+    from { opacity: 0; transform: rotateY(-30deg) translateZ(-50px); }
+    to { opacity: 1; transform: rotateY(0) translateZ(0); }
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  @keyframes bob {
+    0%, 100% { transform: translateY(0) rotate(-2deg); }
+    50% { transform: translateY(-8px) rotate(2deg); }
+  }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.08); }
+  }
+  @keyframes drawLine {
+    from { stroke-dashoffset: 1000; }
+    to { stroke-dashoffset: 0; }
+  }
+  @keyframes shine {
+    0% { background-position: -200% center; }
+    100% { background-position: 200% center; }
+  }
+
+  /* Navigation */
+  .nav {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    z-index: 100;
+    background: rgba(245, 239, 224, 0.92);
+    backdrop-filter: blur(10px);
+    padding: 10px 20px;
+    border-radius: 999px;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.18);
+  }
+  .nav button {
+    border: none;
+    background: var(--green);
+    color: white;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 700;
+  }
+  .nav button:hover { background: var(--green-deep); transform: scale(1.1); }
+  .nav .indicator {
+    font-family: 'Gowun Dodum', sans-serif;
+    font-weight: 700;
+    color: var(--brown-dark);
+    font-size: 14px;
+    min-width: 60px;
+    text-align: center;
+  }
+  .progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--green-deep), var(--yellow));
+    z-index: 100;
+    transition: width 0.5s ease;
+  }
+
+  /* Slide common layout */
+  .slide-header {
+    position: absolute;
+    top: 3vh;
+    left: 5vw;
+    right: 5vw;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+    color: var(--brown);
+    z-index: 5;
+  }
+  .slide-num {
+    background: var(--green);
+    color: white;
+    padding: 5px 14px;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 1px;
+  }
+  .slide-title-en {
+    color: var(--green-deep);
+    font-weight: 500;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    font-size: 12px;
+  }
+
+  .container {
+    width: 100%;
+    height: 100%;
+    max-width: 1400px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+  }
+  .h-section { display: flex; gap: 4vw; align-items: center; width: 100%; }
+  .left-col { flex: 1; }
+  .right-col { flex: 1; display: flex; justify-content: center; align-items: center; }
+
+  h1 { font-family: 'Jua', sans-serif; font-size: 5rem; color: var(--brown-dark); line-height: 1.1; }
+  h2 { font-family: 'Jua', sans-serif; font-size: 2.6rem; color: var(--brown-dark); margin-bottom: 0.4em; line-height: 1.2; }
+  h3 { font-family: 'Jua', sans-serif; font-size: 1.6rem; color: var(--green-deep); margin-bottom: 0.3em; }
+  h4 { font-family: 'Jua', sans-serif; font-size: 1.15rem; color: var(--brown-dark); margin-bottom: 0.4em; }
+  p, li { font-size: 1.05rem; line-height: 1.7; color: var(--brown-dark); }
+  .subtitle { font-size: 1.3rem; color: var(--green-deep); font-weight: 500; margin-bottom: 1.2em; }
+  .accent { color: var(--green-deep); font-weight: 700; }
+
+  /* Phone mockup */
+  .phone {
+    width: 280px;
+    height: 575px;
+    background: var(--beige);
+    border-radius: 42px;
+    border: 7px solid #1a1a1a;
+    position: relative;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.3), inset 0 0 0 2px #444;
+    overflow: hidden;
+    animation: float 4s ease-in-out infinite;
+  }
+  .phone.lg { width: 320px; height: 660px; }
+  .phone-notch {
+    width: 95px;
+    height: 22px;
+    background: #1a1a1a;
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 0 0 15px 15px;
+    z-index: 3;
+  }
+  .phone-screen {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    position: relative;
+    padding-top: 35px;
+  }
+
+  /* Character SVG drawings */
+  .gulbi {
+    display: inline-block;
+  }
+
+  /* Title slide */
+  .title-bg {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(circle at 20% 30%, var(--green-light) 0%, transparent 50%),
+      radial-gradient(circle at 80% 70%, var(--yellow) 0%, transparent 40%),
+      var(--beige);
+    opacity: 0.6;
+  }
+  .title-content {
+    text-align: center;
+    position: relative;
+    z-index: 2;
+  }
+  .title-content h1 {
+    font-size: 7rem;
+    color: var(--brown-dark);
+    margin-bottom: 0.2em;
+    text-shadow: 4px 4px 0 var(--green-light);
+  }
+  .title-content .tag {
+    font-size: 1.3rem;
+    color: var(--green-deep);
+    margin-bottom: 2em;
+    letter-spacing: 4px;
+  }
+  .title-meta {
+    background: white;
+    padding: 24px 40px;
+    border-radius: 20px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+    display: inline-block;
+    margin-top: 2em;
+  }
+  .title-meta div { margin: 4px 0; font-size: 0.95rem; }
+
+  /* Team card */
+  .team-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+    margin-top: 2em;
+  }
+  .team-card {
+    background: white;
+    border-radius: 24px;
+    padding: 28px 20px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    border: 3px solid var(--green-light);
+    transition: transform 0.3s;
+  }
+  .team-card:hover { transform: translateY(-8px); border-color: var(--green); }
+  .team-name { font-family: 'Jua', sans-serif; font-size: 1.5rem; color: var(--brown-dark); }
+  .team-role { color: var(--green-deep); font-weight: 700; font-size: 0.9rem; margin: 6px 0 14px; padding: 4px 12px; background: var(--green-light); border-radius: 12px; display: inline-block; }
+  .team-tasks { font-size: 0.85rem; line-height: 1.6; color: var(--brown); }
+  .team-tasks li { font-size: 0.85rem; margin-left: 18px; list-style: '· '; }
+
+  /* Bullet list */
+  .clean-list { list-style: none; margin: 1em 0; }
+  .clean-list li {
+    padding: 14px 0 14px 36px;
+    position: relative;
+    border-bottom: 1px dashed rgba(107, 79, 58, 0.2);
+  }
+  .clean-list li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 22px;
+    width: 24px;
+    height: 24px;
+    background: var(--green);
+    border-radius: 50%;
+    box-shadow: inset 0 -2px 0 var(--green-deep);
+  }
+  .clean-list li::after {
+    content: '✓';
+    position: absolute;
+    left: 7px;
+    top: 18px;
+    color: white;
+    font-weight: 900;
+    font-size: 14px;
+  }
+
+  /* Card grid */
+  .card-grid {
+    display: grid;
+    gap: 18px;
+    margin: 1.5em 0;
+  }
+  .card-grid.cols-2 { grid-template-columns: 1fr 1fr; }
+  .card-grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .card-grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
+  .card {
+    background: white;
+    border-radius: 20px;
+    padding: 22px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.06);
+    border-left: 5px solid var(--green);
+    transition: all 0.3s;
+  }
+  .card:hover { transform: translateY(-4px); box-shadow: 0 12px 30px rgba(0,0,0,0.12); }
+  .card .num {
+    display: inline-block;
+    background: var(--green-deep);
+    color: white;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    margin-bottom: 8px;
+    font-weight: 700;
+  }
+  .card.tinted { background: var(--cream); }
+  .card.green { background: var(--green-light); border-left-color: var(--green-deep); }
+  .card.yellow { background: #fdf5d0; border-left-color: var(--yellow); }
+
+  /* Stat / KPI */
+  .stat-row {
+    display: flex;
+    gap: 18px;
+    margin: 1.5em 0;
+    flex-wrap: wrap;
+  }
+  .stat {
+    flex: 1;
+    min-width: 130px;
+    background: white;
+    border-radius: 16px;
+    padding: 22px 16px;
+    text-align: center;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+    border-bottom: 4px solid var(--green);
+  }
+  .stat .v { font-family: 'Jua', sans-serif; font-size: 2.3rem; color: var(--green-deep); }
+  .stat .l { font-size: 0.85rem; color: var(--brown); margin-top: 4px; }
+
+  /* Loop diagram */
+  .loop {
+    position: relative;
+    width: 580px;
+    height: 580px;
+    margin: 0 auto;
+  }
+  .loop-node {
+    position: absolute;
+    width: 130px;
+    height: 130px;
+    border-radius: 50%;
+    background: white;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 8px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--brown-dark);
+    border: 3px solid var(--green-light);
+    transition: transform 0.3s;
+  }
+  .loop-node:hover { transform: scale(1.08); background: var(--green-light); }
+  .loop-node .ico { font-size: 1.8rem; margin-bottom: 4px; }
+  .loop-node.n1 { top: 0; left: 50%; transform: translateX(-50%); }
+  .loop-node.n2 { top: 22%; right: 0; }
+  .loop-node.n3 { bottom: 22%; right: 0; }
+  .loop-node.n4 { bottom: 0; left: 50%; transform: translateX(-50%); }
+  .loop-node.n5 { bottom: 22%; left: 0; }
+  .loop-node.n6 { top: 22%; left: 0; }
+  .loop-center {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    background: var(--green-deep);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    box-shadow: 0 12px 30px rgba(92, 124, 90, 0.4);
+    animation: pulse 3s infinite;
+  }
+  .loop-center .label { font-family: 'Jua', sans-serif; font-size: 1.5rem; }
+  .loop-center .sub { font-size: 0.8rem; opacity: 0.85; }
+
+  /* App mock - Home screen */
+  .mock-home {
+    width: 100%; height: 100%;
+    background: var(--beige);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    padding: 10px;
+  }
+  .mock-top {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 8px 12px;
+  }
+  .mock-heart {
+    display: flex; gap: 4px;
+  }
+  .mock-heart span { color: #FF6B7A; font-size: 14px; }
+  .mock-counter { font-family: 'Jua'; font-size: 22px; }
+  .mock-profile {
+    width: 38px; height: 38px;
+    background: var(--green-light);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
+    color: var(--brown-dark);
+  }
+  .mission-btn {
+    background: var(--green);
+    color: white;
+    padding: 10px 16px;
+    border-radius: 30px;
+    text-align: center;
+    margin: 10px 14px;
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .room-scene {
+    flex: 1;
+    background: linear-gradient(to bottom, #F5DCC2 0%, #F5DCC2 55%, var(--wood) 55%, var(--wood-light) 100%);
+    margin: 6px;
+    border-radius: 10px;
+    position: relative;
+    overflow: hidden;
+  }
+  .room-door {
+    width: 36px; height: 70px;
+    background: var(--brown);
+    position: absolute;
+    left: 18%;
+    top: 18%;
+    border-radius: 18px 18px 0 0;
+    border: 2px solid var(--brown-dark);
+  }
+  .room-window {
+    width: 40px; height: 50px;
+    background: #BFD8E8;
+    position: absolute;
+    right: 18%;
+    top: 22%;
+    border-radius: 20px 20px 0 0;
+    border: 3px solid var(--brown);
+  }
+  .room-window::before,
+  .room-window::after {
+    content: '';
+    position: absolute;
+    background: var(--brown);
+  }
+  .room-window::before {
+    width: 2px; height: 100%;
+    left: 50%; top: 0;
+    transform: translateX(-50%);
+  }
+  .room-window::after {
+    width: 100%; height: 2px;
+    top: 50%; left: 0;
+    transform: translateY(-50%);
+  }
+  .room-character {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100px;
+  }
+  .bottom-tabs {
+    display: flex;
+    gap: 6px;
+    padding: 10px;
+    background: var(--cream);
+  }
+  .bottom-tabs > div {
+    flex: 1;
+    background: var(--green-light);
+    padding: 12px;
+    border-radius: 16px;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--brown-dark);
+  }
+  .bottom-tabs .main {
+    flex: 1.8;
+    background: var(--green);
+    color: white;
+  }
+
+  /* Color swatches */
+  .color-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin: 1em 0;
+  }
+  .swatch {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+  }
+  .swatch-color {
+    height: 80px;
+  }
+  .swatch-info { padding: 12px; }
+  .swatch-name { font-family: 'Jua'; font-size: 1rem; }
+  .swatch-hex { font-size: 0.75rem; color: var(--brown); font-family: monospace; }
+
+  /* Process arrow */
+  .process {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin: 1.2em 0;
+  }
+  .process-step {
+    flex: 1;
+    background: white;
+    padding: 18px 12px;
+    border-radius: 14px;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    border-top: 4px solid var(--green);
+    font-size: 0.9rem;
+    font-weight: 700;
+  }
+  .process-arrow {
+    color: var(--green-deep);
+    font-size: 1.3rem;
+    font-weight: 900;
+  }
+
+  /* Comparison table */
+  .compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    margin: 1em 0;
+  }
+  .compare > div {
+    padding: 16px;
+    border-radius: 14px;
+    text-align: center;
+    font-size: 0.95rem;
+  }
+  .compare .label { background: var(--cream); font-weight: 700; }
+  .compare .a { background: white; color: var(--brown); }
+  .compare .b { background: var(--green-light); color: var(--brown-dark); font-weight: 700; border: 2px solid var(--green); }
+
+  /* Reels timeline */
+  .reels-timeline {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 14px;
+    margin-top: 1.5em;
+  }
+  .reel-card {
+    background: white;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+    transition: transform 0.3s;
+  }
+  .reel-card:hover { transform: translateY(-6px); }
+  .reel-thumb {
+    height: 140px;
+    background: linear-gradient(135deg, var(--green-light), var(--cream));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    color: var(--green-deep);
+    position: relative;
+    border-bottom: 3px solid var(--green);
+  }
+  .reel-card .info { padding: 12px; }
+  .reel-card .ep { font-size: 0.75rem; color: var(--green-deep); font-weight: 700; letter-spacing: 1px; }
+  .reel-card .ttl { font-family: 'Jua'; font-size: 0.95rem; margin: 4px 0; }
+  .reel-card .desc { font-size: 0.75rem; color: var(--brown); line-height: 1.5; }
+
+  /* Final slide */
+  .roadmap {
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+    margin-top: 2em;
+  }
+  .road-step {
+    flex: 1;
+    text-align: center;
+    background: white;
+    padding: 18px 12px;
+    border-radius: 14px 14px 0 0;
+    box-shadow: 0 -6px 18px rgba(0,0,0,0.04);
+  }
+  .road-step.s1 { background: var(--green-light); height: 160px; }
+  .road-step.s2 { background: var(--green); height: 190px; color: white; }
+  .road-step.s3 { background: var(--green-deep); height: 220px; color: white; }
+
+  /* SVG character */
+  .character-svg { width: 100%; max-width: 240px; }
+
+  .ribbon {
+    display: inline-block;
+    background: var(--yellow);
+    color: var(--brown-dark);
+    padding: 4px 14px;
+    border-radius: 4px 14px 14px 4px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+
+  /* Slide 4 -- target/trend */
+  .quote-box {
+    background: white;
+    border-left: 6px solid var(--green-deep);
+    padding: 18px 22px;
+    border-radius: 0 14px 14px 0;
+    margin: 14px 0;
+    font-size: 1rem;
+    color: var(--brown);
+  }
+  .keyword-pills {
+    display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0;
+  }
+  .keyword-pills span {
+    background: white;
+    border: 2px solid var(--green);
+    color: var(--green-deep);
+    padding: 5px 14px;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 700;
+  }
+
+  /* Phone screen 2: Shop */
+  .mock-shop {
+    width: 100%; height: 100%;
+    background: var(--beige);
+    display: flex;
+    flex-direction: column;
+  }
+  .shop-top {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 14px;
+    font-family: 'Jua';
+  }
+  .point-badge {
+    background: white;
+    padding: 4px 12px;
+    border-radius: 999px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+  }
+  .point-badge .dot { width: 16px; height: 16px; background: var(--yellow); border-radius: 50%; font-size: 10px; display: flex; align-items: center; justify-content: center; }
+  .shop-preview {
+    margin: 8px 14px;
+    height: 220px;
+    background: linear-gradient(to bottom, #F5DCC2 0%, #F5DCC2 55%, var(--wood) 55%, var(--wood-light) 100%);
+    border-radius: 10px;
+    position: relative;
+  }
+  .shop-categories {
+    display: flex;
+    gap: 6px;
+    padding: 8px 14px;
+  }
+  .shop-cat {
+    background: var(--green-light);
+    color: var(--brown-dark);
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .shop-cat.active { background: var(--green-deep); color: white; }
+  .shop-items {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    padding: 0 10px;
+  }
+  .shop-item {
+    background: white;
+    border-radius: 10px;
+    padding: 10px;
+    text-align: center;
+    font-size: 0.7rem;
+    position: relative;
+  }
+  .shop-item .lock { position: absolute; top: 6px; left: 6px; font-size: 10px; }
+  .shop-item .price { font-size: 0.7rem; color: var(--brown); margin-top: 6px; display: flex; align-items: center; gap: 2px; justify-content: center; }
+
+  /* Cover background pattern */
+  .pattern-dots {
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle, rgba(143, 168, 137, 0.15) 1.5px, transparent 1.5px);
+    background-size: 30px 30px;
+    pointer-events: none;
+  }
+
+  /* Hint */
+  .hint {
+    position: fixed;
+    bottom: 80px;
+    right: 20px;
+    background: rgba(60, 60, 60, 0.85);
+    color: white;
+    padding: 10px 16px;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    z-index: 100;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s;
+  }
+  .hint.show { opacity: 1; }
+</style>
+</head>
+<body>
+  <div class="progress" id="progress"></div>
+  <div class="deck" id="deck">
+
+    <!-- ========== SLIDE 1: TITLE ========== -->
+    <section class="slide fx-zoom active" data-fx="zoom">
+      <div class="title-bg"></div>
+      <div class="pattern-dots"></div>
+      <div class="container">
+        <div class="title-content anim">
+          <div style="margin-bottom: 1.5em; animation: bob 3s ease-in-out infinite;">
+            <!-- Gulbi logo -->
+            <svg width="180" height="180" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+              <rect x="20" y="20" width="160" height="160" rx="28" fill="#BFCFB5"/>
+              <!-- Rope -->
+              <path d="M 100 30 Q 95 40 100 50 Q 105 60 100 70" stroke="#3E2C1C" stroke-width="3" fill="none"/>
+              <!-- Knot -->
+              <ellipse cx="100" cy="78" rx="14" ry="10" fill="#3E2C1C"/>
+              <!-- Fish body -->
+              <path d="M 60 110 Q 60 95 80 90 Q 120 88 145 100 Q 155 110 145 120 Q 120 132 80 130 Q 60 125 60 110 Z" fill="#3E2C1C"/>
+              <!-- Tail -->
+              <path d="M 55 110 L 35 90 L 40 110 L 35 130 Z" fill="#3E2C1C"/>
+              <!-- Eye -->
+              <circle cx="78" cy="106" r="4" fill="#FAF5E8"/>
+              <circle cx="78" cy="106" r="2" fill="#3E2C1C"/>
+              <!-- Gill -->
+              <path d="M 92 100 Q 95 110 92 122" stroke="#FAF5E8" stroke-width="2" fill="none"/>
+              <!-- Scale lines -->
+              <path d="M 110 100 Q 115 110 110 122" stroke="#FAF5E8" stroke-width="1.5" fill="none"/>
+              <path d="M 125 102 Q 130 110 125 120" stroke="#FAF5E8" stroke-width="1.5" fill="none"/>
+            </svg>
+          </div>
+          <h1>자린고비</h1>
+          <div class="tag">JARINGOBI · 자린이와 함께하는 절약 생활</div>
+          <div style="font-size: 1.4rem; color: var(--brown); margin-top: 1em; font-weight: 500;">
+            2030 청년층을 위한 <span class="accent">커뮤니티형 캐릭터 절약 플랫폼</span>
+          </div>
+          <div class="title-meta">
+            <div><strong>과정명</strong> · K-Digital Training 서비스 기획 & 프론트엔드 개발</div>
+            <div><strong>팀명</strong> · 18조 자린고비 팀</div>
+            <div><strong>팀원</strong> · 서지원 · 박민주 · 강양정 · 박효은</div>
+            <div><strong>발표일</strong> · 2026. 05. 20</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== SLIDE 2: TEAM ========== -->
+    <section class="slide fx-fade" data-fx="fade">
+      <div class="slide-header"><span class="slide-num">01</span><span class="slide-title-en">TEAM · 팀원 소개</span></div>
+      <div class="container anim">
+        <h2>돈 없는 20대 백수 넷이 모이면…</h2>
+        <div class="subtitle">기획부터 디자인, 개발, 마케팅까지 — 4인 4역의 풀스택 협업</div>
+        <div class="team-grid stagger">
+          <div class="team-card">
+            <div class="team-name">서지원</div>
+            <div class="team-role">PM · UX · FE</div>
+            <ul class="team-tasks">
+              <li>서비스 아이디어 총괄 기획</li>
+              <li>전체 기능/사용자 플로우 설계</li>
+              <li>React Native 프론트엔드 개발</li>
+              <li>Capacitor Android 빌드/배포</li>
+              <li>Google Play 내부 테스트</li>
+            </ul>
+          </div>
+          <div class="team-card">
+            <div class="team-name">박민주</div>
+            <div class="team-role">기획 · 마케팅</div>
+            <ul class="team-tasks">
+              <li>사용자 타겟·경쟁 서비스 리서치</li>
+              <li>짠테크 트렌드 조사</li>
+              <li>챌린지 콘텐츠 정책 기획</li>
+              <li>SNS 숏폼 홍보 전략 기획</li>
+              <li>UI 컴포넌트 제작 지원</li>
+            </ul>
+          </div>
+          <div class="team-card">
+            <div class="team-name">강양정</div>
+            <div class="team-role">AI 디자인 · FE</div>
+            <ul class="team-tasks">
+              <li>AI 이미지 생성 프롬프트 설계</li>
+              <li>캐릭터/배경 스타일 가이드</li>
+              <li>Figma UI 시안 제작</li>
+              <li>인터랙션 아이디어 제안</li>
+              <li>디자인 시스템 정리</li>
+            </ul>
+          </div>
+          <div class="team-card">
+            <div class="team-name">박효은</div>
+            <div class="team-role">캐릭터 · UI</div>
+            <ul class="team-tasks">
+              <li>자린이 캐릭터 디자인</li>
+              <li>의상/아이템 200여 종 디자인</li>
+              <li>상점·옷장 UI 디자인</li>
+              <li>아이콘·오브젝트 그래픽</li>
+              <li>디자인 QA 총괄</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== SLIDE 3: BACKGROUND ========== -->
+    <section class="slide fx-slide" data-fx="slide">
+      <div class="slide-header"><span class="slide-num">02</span><span class="slide-title-en">BACKGROUND · 기획 배경</span></div>
+      <div class="container">
+        <div class="h-section">
+          <div class="left-col anim">
+            <div class="ribbon">PROJECT START</div>
+            <h2>"아껴야 한다"보다<br/><span class="accent">"계속 하고 싶다"</span></h2>
+            <div class="subtitle">절약을 게임처럼 가볍게 만드는 생활형 플랫폼</div>
+            <ul class="clean-list stagger">
+              <li><strong>현실 인식</strong> — 20대 초중반은 투자할 자본조차 부족, 가장 현실적인 재테크는 '소비를 줄이는 것'</li>
+              <li><strong>기존 한계</strong> — 가계부/금융 앱은 숫자·통계 중심이라 사용 피로도가 높고 지속이 어려움</li>
+              <li><strong>방향 전환</strong> — '정보 제공'에서 '절약 행동 유도' 중심으로 확장</li>
+              <li><strong>해결책</strong> — 챌린지 + 캐릭터 성장 + 커뮤니티 결합형 절약 플랫폼</li>
+            </ul>
+          </div>
+          <div class="right-col anim" style="flex: 0.9;">
+            <div class="phone">
+              <div class="phone-notch"></div>
+              <div class="phone-screen">
+                <div class="mock-home">
+                  <div class="mock-top">
+                    <div>
+                      <div class="mock-heart"><span>♥</span><span>♥</span><span>♥</span></div>
+                      <div style="font-size: 11px; color: var(--brown); margin-top: 2px;">D-30</div>
+                    </div>
+                    <div class="mock-counter">0</div>
+                    <div class="mock-profile">MY</div>
+                  </div>
+                  <div class="mission-btn">오늘의 절약미션</div>
+                  <div class="room-scene">
+                    <div class="room-door"></div>
+                    <div class="room-window"></div>
+                    <div class="room-character">
+                      <!-- Gulbi character -->
+                      <svg viewBox="0 0 100 140" xmlns="http://www.w3.org/2000/svg">
+                        <!-- hair -->
+                        <path d="M40 12 L42 4 M48 10 L50 2 M56 12 L58 4" stroke="#3E2C1C" stroke-width="2"/>
+                        <!-- body -->
+                        <path d="M28 30 Q22 50 24 90 Q26 120 38 130 L62 130 Q74 120 76 90 Q78 50 72 30 Q60 18 50 18 Q40 18 28 30 Z" fill="#E8D9BD" stroke="#3E2C1C" stroke-width="1.5"/>
+                        <!-- arms -->
+                        <path d="M28 50 Q22 80 28 100" stroke="#3E2C1C" stroke-width="1.5" fill="#E8D9BD"/>
+                        <path d="M72 50 Q78 80 72 100" stroke="#3E2C1C" stroke-width="1.5" fill="#E8D9BD"/>
+                        <!-- eyes -->
+                        <path d="M38 35 Q42 38 46 35" stroke="#3E2C1C" stroke-width="2" fill="none" stroke-linecap="round"/>
+                        <path d="M54 35 Q58 38 62 35" stroke="#3E2C1C" stroke-width="2" fill="none" stroke-linecap="round"/>
+                        <!-- mouth (gulbi fish mouth) -->
+                        <ellipse cx="50" cy="52" rx="9" ry="6" fill="#B07C4F" stroke="#3E2C1C" stroke-width="1.5"/>
+                        <ellipse cx="50" cy="52" rx="5" ry="3" fill="#6B4F3A"/>
+                      </svg>
+                    </div>
+                  </div>
+                  <div class="bottom-tabs">
+                    <div>수다방</div>
+                    <div class="main">챌린지</div>
+                    <div>카메라</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== SLIDE 4: TARGET & TREND ========== -->
+    <section class="slide fx-fade" data-fx="fade">
+      <div class="slide-header"><span class="slide-num">02</span><span class="slide-title-en">TARGET & TREND · 타겟·트렌드 분석</span></div>
+      <div class="container anim">
+        <h2>재미와 공유가 결합된 '짠테크' 세대</h2>
+        <div class="subtitle">소비 부담은 크지만 자본이 부족한 20대 초중반</div>
+        <div class="h-section" style="align-items: flex-start; margin-top: 1em;">
+          <div style="flex: 1;">
+            <h3>TARGET</h3>
+            <div class="keyword-pills stagger">
+              <span># 대학생</span>
+              <span># 취업준비생</span>
+              <span># 사회초년생</span>
+              <span># 20대 초중반</span>
+              <span># 소액 절약</span>
+            </div>
+            <div class="quote-box">
+              본격적인 투자·재테크를 시작할 <strong>자본이 부족</strong>한 세대.<br/>
+              개성·취향을 표현할 수 있는 <strong>라이프스타일 서비스</strong>를 선호한다.
+            </div>
+            <ul class="clean-list">
+              <li>챌린지·캐릭터·커뮤니티 콘텐츠에 높은 참여도</li>
+              <li>앱테크·짠테크·인증 문화에 익숙</li>
+              <li>'데이터'보다 '경험'에 반응</li>
+            </ul>
+          </div>
+          <div style="flex: 1;">
+            <h3>TREND</h3>
+            <div class="card-grid cols-2 stagger" style="margin-top: 0.5em;">
+              <div class="card tinted">
+                <div class="num">01</div>
+                <h4>런치플레이션</h4>
+                <p style="font-size:0.9rem;">고물가 시대, 식비 부담 급증으로 소액 절약 문화 확산</p>
+              </div>
+              <div class="card tinted">
+                <div class="num">02</div>
+                <h4>짠테크 유행</h4>
+                <p style="font-size:0.9rem;">생활 속 절약을 SNS로 공유하는 인증 문화</p>
+              </div>
+              <div class="card tinted">
+                <div class="num">03</div>
+                <h4>커뮤니티 공유</h4>
+                <p style="font-size:0.9rem;">정보 제공보다 경험 공유에 반응하는 사용자</p>
+              </div>
+              <div class="card tinted">
+                <div class="num">04</div>
+                <h4>게임형 보상</h4>
+                <p style="font-size:0.9rem;">캐시워크·앱테크처럼 보상 기반 참여 구조 선호</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== SLIDE 5: BENCHMARK ========== -->
+    <section class="slide fx-slide" data-fx="slide">
+      <div class="slide-header"><span class="slide-num">02</span><span class="slide-title-en">BENCHMARK · 벤치마킹</span></div>
+      <div class="container anim">
+        <h2>기존 서비스의 공백을 발견하다</h2>
+        <div class="subtitle">육성형 게임 · 절약 앱 · 커뮤니티 — 세 영역의 강점을 결합</div>
+        <div class="card-grid cols-3 stagger" style="margin-top: 1.2em;">
+          <div class="card">
+            <div class="num">육성형 게임</div>
+            <h4>Fortune City · 듀오링고 · 썸원</h4>
+            <p style="font-size: 0.9rem; margin-top: 8px;">
+              · 행동 → 즉각적인 시각 변화<br/>
+              · 연속성(Streak) · 짧은 행동 단위<br/>
+              · 캐릭터 공간 성장 구조
+            </p>
+            <p style="font-size: 0.8rem; color: var(--brown); margin-top: 8px;">한계: 현실 연결 부족</p>
+          </div>
+          <div class="card">
+            <div class="num">절약·재테크 앱</div>
+            <h4>캐시워크 · 팔라고</h4>
+            <p style="font-size: 0.9rem; margin-top: 8px;">
+              · 행동 → 즉각 보상<br/>
+              · 매일 접속 동기 부여<br/>
+              · 실생활 소비 절약 체감
+            </p>
+            <p style="font-size: 0.8rem; color: var(--brown); margin-top: 8px;">한계: 감정적 보상 부족</p>
+          </div>
+          <div class="card">
+            <div class="num">커뮤니티</div>
+            <h4>거지맵 · 네이버 카페</h4>
+            <p style="font-size: 0.9rem; margin-top: 8px;">
+              · 사용자 직접 등록 데이터<br/>
+              · 지역 기반 공유<br/>
+              · 인증 문화 → 참여 유도
+            </p>
+            <p style="font-size: 0.8rem; color: var(--brown); margin-top: 8px;">한계: 행동 지속성 부족</p>
+          </div>
+        </div>
+        <div class="card green" style="margin-top: 1.5em; text-align: center;">
+          <h3 style="color: var(--brown-dark);">자린고비의 기회 영역</h3>
+          <p style="font-size: 1.1rem;">절약 + 챌린지 + 커뮤니티 + 캐릭터 성장 — <strong>네 가지 요소의 결합</strong></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== SLIDE 6: SERVICE STRUCTURE LOOP ========== -->
+    <section class="slide fx-zoom" data-fx="zoom">
+      <div class="slide-header"><span class="slide-num">03</span><span class="slide-title-en">SERVICE STRUCTURE · 서비스 구조</span></div>
+      <div class="container">
+        <div class="h-section">
+          <div class="left-col anim">
+            <h2>선순환 서비스 구조</h2>
+            <div class="subtitle">절약 → 보상 → 성장 → 공유 → 다시 절약</div>
+            <p style="margin-bottom: 1em;">사용자의 작은 절약 행동이 캐릭터의 성장으로 이어지고, 성장 결과를 공유하며 자연스럽게 다음 챌린지에 참여하는 <span class="accent">반복 구조</span>를 설계했습니다.</p>
+            <ul class="clean-list">
+              <li>일상 속 가벼운 미션으로 부담 최소화</li>
+              <li>행동에 대한 즉각적이고 시각적인 보상</li>
+              <li>소비 욕구를 게임형 경험으로 전환</li>
+              <li>사회적 인정과 경쟁을 통한 지속 동기</li>
+            </ul>
+          </div>
+          <div class="right-col anim">
+            <div class="loop">
+              <div class="loop-center">
+                <div class="label">자린고비</div>
+                <div class="sub">SAVING LOOP</div>
+              </div>
+              <div class="loop-node n1"><div class="ico">🎯</div>챌린지 수행</div>
+              <div class="loop-node n2"><div class="ico">💰</div>금액 누적</div>
+              <div class="loop-node n3"><div class="ico">⭐</div>포인트 획득</div>
+              <div class="loop-node n4"><div class="ico">🪄</div>캐릭터 성장</div>
+              <div class="loop-node n5"><div class="ico">🏆</div>칭호 획득</div>
+              <div class="loop-node n6"><div class="ico">💬</div>커뮤니티 공유</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== SLIDE 7: CHALLENGE SYSTEM ========== -->
+    <section class="slide fx-slide" data-fx="slide">
+      <div class="slide-header"><span class="slide-num">03</span><span class="slide-title-en">CHALLENGE · 챌린지 시스템</span></div>
+      <div class="container">
+        <div class="h-section">
+          <div class="left-col anim">
+            <div class="ribbon">FUNCTION 01</div>
+            <h2>행동 유도형 챌린지</h2>
+            <div class="subtitle">기록이 아닌 '실천' 중심의 인증 시스템</div>
+            <div class="card-grid cols-2 stagger" style="margin-top: 1em;">
+              <div class="card">
+                <h4>🎲 랜덤 배정</h4>
+                <p style="font-size: 0.9rem;">매일 새로운 절약 미션을 자동 제공</p>
+              </div>
+              <div class="card">
+                <h4>📸 사진 인증</h4>
+                <p style="font-size: 0.9rem;">카메라·갤러리 기반 실제 행동 인증</p>
+              </div>
+              <div class="card">
+                <h4>🍱 카테고리</h4>
+                <p style="font-size: 0.9rem;">식비·교통·문화·습관 영역 균형 분배</p>
+              </div>
+              <div class="card">
+                <h4>📈 난이도</h4>
+                <p style="font-size: 0.9rem;">난이도별 보상·포인트 차등 지급</p>
+              </div>
+            </div>
+            <div class="quote-box" style="margin-top: 1em;">
+              <strong>예시 미션 ·</strong> 커피 대신 집에서 마시기 · 편의점 꿀조합 한 끼 · 택시 대신 대중교통 · 배달 대신 직접 요리하기
+            </div>
+          </div>
+          <div class="right-col anim" style="flex: 0.85;">
+            <div class="phone">
+              <div class="phone-notch"></div>
+              <div class="phone-screen">
+                <div style="background: var(--beige); height: 100%; padding: 30px 18px;">
+                  <h3 style="text-align: center; margin-bottom: 14px;">오늘의 미션</h3>
+                  <div style="background: white; border-radius: 16px; padding: 16px; margin-bottom: 12px; border-left: 5px solid var(--green);">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px;">
+                      <span style="font-weight: 700;">☕ 커피 참기</span>
+                      <span style="background: var(--green); color:white; padding:3px 10px; border-radius: 12px; font-size: 11px;">EASY</span>
+                    </div>
+                    <p style="font-size: 12px; color: var(--brown);">집에서 직접 커피 마시기</p>
+                    <div style="display:flex; justify-content:space-between; margin-top:10px; font-size: 11px;">
+                      <span>💰 5,000원 절약</span>
+                      <span style="color: var(--green-deep); font-weight: 700;">⭐ +50P</span>
+                    </div>
+                  </div>
+                  <div style="background: white; border-radius: 16px; padding: 16px; margin-bottom: 12px; border-left: 5px solid var(--yellow);">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px;">
+                      <span style="font-weight: 700;">🚌 대중교통 이용</span>
+                      <span style="background: var(--yellow); color:#6b4f3a; padding:3px 10px; border-radius: 12px; font-size: 11px;">NORMAL</span>
+                    </div>
+                    <p style="font-size: 12px; color: var(--brown);">택시 대신 버스/지하철로 이동</p>
+                    <div style="display:flex; justify-content:space-between; margin-top:10px; font-size: 11px;">
+                      <span>💰 8,000원 절약</span>
+                      <span style="color: var(--green-deep); font-weight: 700;">⭐ +80P</span>
+                    </div>
+                  </div>
+                  <div style="background: white; border-radius: 16px; padding: 16px; border-left: 5px solid #c66;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px;">
+                      <span style="font-weight: 700;">🍳 배달 금지</span>
+                      <span style="background: #c66; color:white; padding:3px 10px; border-radius: 12px; font-size: 11px;">HARD</span>
+                    </div>
+                    <p style="font-size: 12px; color: var(--brown);">하루 동안 직접 요리하기</p>
+                    <div style="display:flex; justify-content:space-between; margin-top:10px; font-size: 11px;">
+                      <span>💰 15,000원 절약</span>
+                      <span style="color: var(--green-deep); font-weight: 700;">⭐ +150P</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== SLIDE 8: CURRENCY & GROWTH ========== -->
+    <section class="slide fx-fade" data-fx="fade">
+      <div class="slide-header"><span class="slide-num">03</span><span class="slide-title-en">CURRENCY & GROWTH · 재화·성장</span></div>
+      <div class="container anim">
+        <div class="ribbon">FUNCTION 02 · 03</div>
+        <h2>이원화 재화로 절약을 시각화하다</h2>
+        <div class="subtitle">실제 절약 금액 + 게임형 포인트 — 두 가지 보상 체계</div>
+        <div class="h-section" style="margin-top: 1.5em;">
+          <div style="flex: 1.2;">
+            <div class="card-grid cols-2 stagger">
+              <div class="card green">
+                <h3 style="color: var(--brown-dark);">💰 절약 금액</h3>
+                <p style="margin-top: 8px;">사용자가 실제로 아낀 소비 금액. 메인 화면에 누적 노출되어 절약 성과를 직관적으로 체감합니다.</p>
+                <ul style="margin-top: 10px; padding-left: 20px;">
+                  <li style="font-size: 0.9rem;">실시간 누적 가시화</li>
+                  <li style="font-size: 0.9rem;">월별 랭킹 시스템 연동</li>
+                  <li style="font-size: 0.9rem;">절약 효과 즉각 인지</li>
+                </ul>
+              </div>
+              <div class="card yellow">
+                <h3>⭐ 포인트</h3>
+                <p style="margin-top: 8px;">챌린지 성공 시 획득하는 게임 재화. 상점에서 아이템 구매 및 캐릭터 성장에 사용됩니다.</p>
+                <ul style="margin-top: 10px; padding-left: 20px;">
+                  <li style="font-size: 0.9rem;">아이템 구매 통화</li>
+                  <li style="font-size: 0.9rem;">난이도 기반 차등 지급</li>
+                  <li style="font-size: 0.9rem;">캐릭터·공간 해금</li>
+                </ul>
+              </div>
+            </div>
+            <div class="stat-row stagger" style="margin-top: 1.5em;">
+              <div class="stat"><div class="v">200+</div><div class="l">꾸미기 아이템</div></div>
+              <div class="stat"><div class="v">4</div><div class="l">상점 카테고리</div></div>
+              <div class="stat"><div class="v">∞</div><div class="l">랜덤 챌린지</div></div>
+              <div class="stat"><div class="v">D-30</div><div class="l">목표 주기</div></div>
+            </div>
+          </div>
+          <div style="flex: 1; display:flex; justify-content:center;">
+            <div class="phone">
+              <div class="phone-notch"></div>
+              <div class="phone-screen">
+                <div class="mock-shop">
+                  <div class="shop-top">
+                    <span style="font-size: 16px;">‹</span>
+                    <div class="point-badge">
+                      <span class="dot">★</span>
+                      <strong>100P</strong>
+                    </div>
+                    <span style="font-size: 16px;">▢</span>
+                  </div>
+                  <div class="shop-preview">
+                    <div style="position:absolute; left:18%; top:18%; width:24px;height:50px;background:var(--brown);border-radius:14px 14px 0 0;"></div>
+                    <div style="position:absolute; right:18%; top:22%; width:30px;height:38px;background:#BFD8E8;border-radius:18px 18px 0 0;border:2px solid var(--brown);"></div>
+                    <div style="position:absolute; bottom:0;left:50%;transform:translateX(-50%);width:60px;">
+                      <svg viewBox="0 0 100 140" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M40 12 L42 4 M48 10 L50 2 M56 12 L58 4" stroke="#3E2C1C" stroke-width="2"/>
+                        <path d="M28 30 Q22 50 24 90 Q26 120 38 130 L62 130 Q74 120 76 90 Q78 50 72 30 Q60 18 50 18 Q40 18 28 30 Z" fill="#E8D9BD" stroke="#3E2C1C" stroke-width="1.5"/>
+                        <path d="M38 35 Q42 38 46 35 M54 35 Q58 38 62 35" stroke="#3E2C1C" stroke-width="2" fill="none" stroke-linecap="round"/>
+                        <ellipse cx="50" cy="52" rx="9" ry="6" fill="#B07C4F" stroke="#3E2C1C" stroke-width="1.5"/>
+                      </svg>
+                    </div>
+                  </div>
+                  <div class="shop-categories">
+                    <div class="shop-cat active">전체</div>
+                    <div class="shop-cat">사치품</div>
+                    <div class="shop-cat">티셔츠</div>
+                    <div class="shop-cat">리모델링</div>
+                  </div>
+                  <div class="shop-items">
+                    <div class="shop-item"><span class="lock">🔒</span><div style="font-size:18px;">🧣</div><div class="price">★ 50P</div></div>
+                    <div class="shop-item"><span class="lock">🔒</span><div style="font-size:18px;">🎩</div><div class="price">★ 20P</div></div>
+                    <div class="shop-item"><span class="lock">🔒</span><div style="font-size:18px;">👓</div><div class="price">★ 400P</div></div>
+                    <div class="shop-item"><span class="lock">🔒</span><div style="font-size:18px;">🧢</div><div class="price">★ 180P</div></div>
+                    <div class="shop-item"><span class="lock">🔒</span><div style="font-size:18px;">🎀</div><div class="price">★ 150P</div></div>
+                    <div class="shop-item"><span class="lock">🔒</span><div style="font-size:18px;">⛑️</div><div class="price">★ 120P</div></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== SLIDE 9: COMMUNITY & TITLES ========== -->
+    <section class="slide fx-slide" data-fx="slide">
+      <div class="slide-header"><span class="slide-num">03</span><span class="slide-title-en">COMMUNITY · 커뮤니티·칭호</span></div>
+      <div class="container anim">
+        <div class="ribbon">FUNCTION 04 · 05 · 06</div>
+        <h2>경험을 공유하며 함께 절약하다</h2>
+        <div class="subtitle">스레드 기반 커뮤니티 · 업적 칭호 · 명예의 전당</div>
+        <div class="card-grid cols-3 stagger" style="margin-top: 1.5em;">
+          <div class="card">
+            <h3>💬 커뮤니티 (수다방)</h3>
+            <p style="margin-top: 8px; font-size: 0.95rem;">긴 글 부담 없는 스레드 기반 게시판. 절약 꿀팁·인증·후기·편의점 조합을 공유합니다.</p>
+            <div class="keyword-pills" style="margin-top: 12px;">
+              <span># 절약꿀팁</span>
+              <span># 인증</span>
+              <span># 가성비레시피</span>
+            </div>
+          </div>
+          <div class="card">
+            <h3>🏷 칭호 시스템</h3>
+            <p style="margin-top: 8px; font-size: 0.95rem;">누적 횟수 기반 업적 시스템. 프로필 대표 칭호로 자신의 절약 스타일을 표현합니다.</p>
+            <ul style="margin-top: 8px; padding-left: 18px; font-size: 0.9rem;">
+              <li>홈 바리스타 (커피 5회)</li>
+              <li>배달 킬러 (배달 금지 10회)</li>
+              <li>편의점 미식가</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>🏆 명예의 전당</h3>
+            <p style="margin-top: 8px; font-size: 0.95rem;">절약 금액·챌린지 수행·칭호 등급·인기 게시글 기준의 종합 랭킹.</p>
+            <div class="keyword-pills" style="margin-top: 12px;">
+              <span>이번 달 TOP</span>
+              <span>꾸미기 스타일</span>
+              <span>장기 챌린저</span>
+            </div>
+          </div>
+        </div>
+        <div class="card tinted" style="margin-top: 1.2em;">
+          <h4>프로필 공개 요소</h4>
+          <div style="display:flex; gap:18px; margin-top:8px; flex-wrap: wrap;">
+            <span class="accent">✓ 대표 칭호</span>
+            <span class="accent">✓ 누적 절약 금액</span>
+            <span class="accent">✓ 방 꾸미기</span>
+            <span class="accent">✓ 캘린더 기록</span>
+            <span class="accent">✓ 포인트</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== SLIDE 10: CHARACTER DESIGN ========== -->
+    <section class="slide fx-zoom" data-fx="zoom">
+      <div class="slide-header"><span class="slide-num">04</span><span class="slide-title-en">CHARACTER · 자린이</span></div>
+      <div class="container">
+        <div class="h-section">
+          <div class="left-col anim">
+            <div class="ribbon">MAIN CHARACTER</div>
+            <h2>'자린이' —<br/>꼬질하지만 정 가는 굴비 인간</h2>
+            <div class="subtitle">완벽하지 않아서 더 친근한 캐릭터</div>
+            <p style="margin: 1em 0;">전통 설화 속 '돈이 없을 때 천장에 굴비를 걸어두고 밥을 먹던' 자린고비 이미지를 현대적으로 재해석. 사용자가 자신의 현실과 <span class="accent">감정적으로 연결</span>되도록 의도했습니다.</p>
+            <div class="card-grid cols-2 stagger">
+              <div class="card tinted">
+                <h4>🐟 말린 굴비 형태</h4>
+                <p style="font-size: 0.88rem;">자린고비 상징</p>
+              </div>
+              <div class="card tinted">
+                <h4>😑 축 처진 눈</h4>
+                <p style="font-size: 0.88rem;">귀찮고 현실적인 감정</p>
+              </div>
+              <div class="card tinted">
+                <h4>👤 작은 머리카락</h4>
+                <p style="font-size: 0.88rem;">허술함 강조</p>
+              </div>
+              <div class="card tinted">
+                <h4>🦵 짧은 팔다리</h4>
+                <p style="font-size: 0.88rem;">기억하기 쉬운 실루엣</p>
+              </div>
+            </div>
+          </div>
+          <div class="right-col anim">
+            <div style="position: relative; text-align:center;">
+              <!-- Big character -->
+              <div style="background: var(--cream); border-radius: 40px; padding: 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.12); animation: float 3s ease-in-out infinite;">
+                <svg width="280" height="380" viewBox="0 0 100 140" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M40 12 L42 2 M48 10 L50 0 M56 12 L58 2" stroke="#3E2C1C" stroke-width="2"/>
+                  <path d="M28 30 Q22 50 24 90 Q26 120 38 130 L62 130 Q74 120 76 90 Q78 50 72 30 Q60 18 50 18 Q40 18 28 30 Z" fill="#E8D9BD" stroke="#3E2C1C" stroke-width="1.8"/>
+                  <path d="M28 50 Q22 80 28 105" stroke="#3E2C1C" stroke-width="1.8" fill="#E8D9BD"/>
+                  <path d="M72 50 Q78 80 72 105" stroke="#3E2C1C" stroke-width="1.8" fill="#E8D9BD"/>
+                  <path d="M38 35 Q42 39 46 35" stroke="#3E2C1C" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                  <path d="M54 35 Q58 39 62 35" stroke="#3E2C1C" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                  <ellipse cx="50" cy="55" rx="11" ry="7" fill="#B07C4F" stroke="#3E2C1C" stroke-width="1.8"/>
+                  <ellipse cx="50" cy="55" rx="6" ry="3.5" fill="#6B4F3A"/>
+                  <ellipse cx="36" cy="42" rx="3" ry="2" fill="#F4B9B0" opacity="0.7"/>
+                  <ellipse cx="64" cy="42" rx="3" ry="2" fill="#F4B9B0" opacity="0.7"/>
+                </svg>
+              </div>
+              <div style="margin-top: 14px;">
+                <h3 style="display: inline-block;">"안녕하세요, 전 자린이입니다 :)"</h3>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== SLIDE 11: VISUAL SYSTEM ========== -->
+    <section class="slide fx-fade" data-fx="fade">
+      <div class="slide-header"><span class="slide-num">04</span><span class="slide-title-en">VISUAL SYSTEM · 비주얼 시스템</span></div>
+      <div class="container anim">
+        <h2>생활형 다이어리 감성의 디자인 시스템</h2>
+        <div class="subtitle">금융 앱의 딱딱함을 걷어내고 따뜻한 빈티지 무드로</div>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 1.5em;">
+          <div>
+            <h3>컬러 시스템</h3>
+            <p style="font-size: 0.95rem; margin-bottom: 12px;">만원권을 연상시키는 그린 + 다이어리 같은 베이지 조합</p>
+            <div class="color-grid">
+              <div class="swatch">
+                <div class="swatch-color" style="background: #F5EFE0;"></div>
+                <div class="swatch-info"><div class="swatch-name">Background</div><div class="swatch-hex">#F5EFE0 Beige</div></div>
+              </div>
+              <div class="swatch">
+                <div class="swatch-color" style="background: #5C7C5A;"></div>
+                <div class="swatch-info"><div class="swatch-name">Main / Button</div><div class="swatch-hex">#5C7C5A Green</div></div>
+              </div>
+              <div class="swatch">
+                <div class="swatch-color" style="background: #E8C547;"></div>
+                <div class="swatch-info"><div class="swatch-name">Hover</div><div class="swatch-hex">#E8C547 Yellow</div></div>
+              </div>
+              <div class="swatch">
+                <div class="swatch-color" style="background: #3E2C1C;"></div>
+                <div class="swatch-info"><div class="swatch-name">Text</div><div class="swatch-hex">#3E2C1C Brown</div></div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <h3>타이포그래피</h3>
+            <p style="font-size: 0.95rem; margin-bottom: 12px;">손글씨 기반 <strong>강원교육모두체</strong> — 다이어리 감성</p>
+            <div class="card" style="text-align:center;">
+              <div style="font-family: 'Gowun Dodum'; font-size: 2.4rem; color: var(--brown-dark); font-weight: 700;">자린고비</div>
+              <div style="font-family: 'Gowun Dodum'; font-size: 1.4rem; color: var(--green-deep); margin-top: 4px;">오늘도 한 푼 아꼈다 :)</div>
+              <div style="font-family: 'Gowun Dodum'; font-size: 1rem; color: var(--brown); margin-top: 6px;">절약은 즐겁고, 캐릭터는 자란다</div>
+            </div>
+            <h3 style="margin-top: 1.5em;">UI 컴포넌트</h3>
+            <div class="card-grid cols-3" style="margin-top: 0.5em;">
+              <div class="card tinted" style="padding: 12px; font-size: 0.85rem; text-align:center;">📇 카드형 UI</div>
+              <div class="card tinted" style="padding: 12px; font-size: 0.85rem; text-align:center;">🔘 큰 버튼</div>
+              <div class="card tinted" style="padding: 12px; font-size: 0.85rem; text-align:center;">📊 진행률 바</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="compare" style="margin-top: 1.5em;">
+          <div class="label">구분</div>
+          <div class="label">기존 금융 서비스</div>
+          <div class="label">자린고비 방향</div>
+          <div class="a">사용자 경험</div><div class="a">관리 중심</div><div class="b">기록 중심</div>
+          <div class="a">사용 감정</div><div class="a">의무감</div><div class="b">가벼운 습관</div>
+          <div class="a">분위기</div><div class="a">금융 서비스 느낌</div><div class="b">생활형 서비스 느낌</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== SLIDE 12: AI ASSET PRODUCTION ========== -->
+    <section class="slide fx-slide" data-fx="slide">
+      <div class="slide-header"><span class="slide-num">04</span><span class="slide-title-en">AI ASSET · AI 활용 디자인</span></div>
+      <div class="container anim">
+        <h2>AI 생성 기반 리소스 제작 파이프라인</h2>
+        <div class="subtitle">200여 종 아이템을 빠르게, 그러나 일관성 있게</div>
+
+        <div class="process stagger" style="margin: 2em 0;">
+          <div class="process-step">📂<br/>카테고리<br/>정의</div>
+          <div class="process-arrow">→</div>
+          <div class="process-step">✍️<br/>프롬프트<br/>설계</div>
+          <div class="process-arrow">→</div>
+          <div class="process-step">🤖<br/>AI 이미지<br/>생성</div>
+          <div class="process-arrow">→</div>
+          <div class="process-step">🎨<br/>스타일<br/>선별</div>
+          <div class="process-arrow">→</div>
+          <div class="process-step">📐<br/>크기·위치<br/>수동 보정</div>
+          <div class="process-arrow">→</div>
+          <div class="process-step">✅<br/>최종<br/>리소스</div>
+        </div>
+
+        <div class="h-section" style="margin-top: 1em; align-items: flex-start;">
+          <div style="flex: 1;">
+            <h3>스타일 가이드</h3>
+            <ul class="clean-list">
+              <li><strong>색감</strong> — 저채도, 따뜻한 톤 유지</li>
+              <li><strong>분위기</strong> — 생활형 · 빈티지 감성</li>
+              <li><strong>형태</strong> — 둥글고 단순한 실루엣</li>
+              <li><strong>질감</strong> — 부드럽고 친근한 무드</li>
+            </ul>
+          </div>
+          <div style="flex: 1;">
+            <h3>아이템 카테고리</h3>
+            <div class="card-grid cols-2 stagger">
+              <div class="card tinted"><h4>👕 의상</h4><p style="font-size: 0.88rem;">티셔츠 · 사치품 · 액세서리</p></div>
+              <div class="card tinted"><h4>🪑 가구</h4><p style="font-size: 0.88rem;">테이블 · 침대 · 소파 · 러그</p></div>
+              <div class="card tinted"><h4>🖼 리모델링</h4><p style="font-size: 0.88rem;">벽지 · 바닥 · 배경 테마</p></div>
+              <div class="card tinted"><h4>🕯 소품</h4><p style="font-size: 0.88rem;">조명 · 서랍 · 장식</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== SLIDE 13: WIREFRAME EVOLUTION ========== -->
+    <section class="slide fx-fade" data-fx="fade">
+      <div class="slide-header"><span class="slide-num">05</span><span class="slide-title-en">WIREFRAME · 와이어프레임 변화 과정</span></div>
+      <div class="container anim">
+        <h2>정보구조도에서 최종 화면까지</h2>
+        <div class="subtitle">사용자 행동 → 보상 → 성장 → 공유 흐름을 단계적으로 정교화</div>
+        <div class="card-grid cols-4 stagger" style="margin-top: 1.5em;">
+          <div class="card">
+            <div class="num">STEP 01</div>
+            <h4>정보구조도</h4>
+            <div style="background: var(--cream); height: 140px; border-radius: 8px; margin: 10px 0; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: var(--green-deep);">🗂</div>
+            <p style="font-size: 0.85rem;">절약·커뮤니티·캐릭터 성장 — 세 요소의 연결 구조 탐색</p>
+          </div>
+          <div class="card">
+            <div class="num">STEP 02</div>
+            <h4>와이어프레임 1차</h4>
+            <div style="background: var(--cream); height: 140px; border-radius: 8px; margin: 10px 0; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: var(--green-deep);">📐</div>
+            <p style="font-size: 0.85rem;">메인 흐름 단순화, 하단 탭 + 마이페이지 배치 확정</p>
+          </div>
+          <div class="card">
+            <div class="num">STEP 03</div>
+            <h4>와이어프레임 2차</h4>
+            <div style="background: var(--green-light); height: 140px; border-radius: 8px; margin: 10px 0; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: var(--brown-dark);">🎨</div>
+            <p style="font-size: 0.85rem;">저채도 그린 컬러 시스템 + 아이템 상점 UI 결합</p>
+          </div>
+          <div class="card green">
+            <div class="num" style="background: var(--brown-dark);">FINAL</div>
+            <h4>최종 와이어프레임</h4>
+            <div style="background: white; height: 140px; border-radius: 8px; margin: 10px 0; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: var(--green-deep);">✨</div>
+            <p style="font-size: 0.85rem;">[행동→보상→성장→공유] 흐름 인터랙션 최종 조율</p>
+          </div>
+        </div>
+        <div class="quote-box" style="margin-top: 1.5em;">
+          <strong>UX 설계 원칙</strong> — 사용자가 앱에 접속했을 때 바로 <span class="accent">'오늘의 절약 행동'</span>을 확인할 수 있도록 메인 흐름을 단순화하고, 카드형 구조와 큰 버튼 중심으로 행동 유도 영역을 강조했다.
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== SLIDE 14: SNS MARKETING ========== -->
+    <section class="slide fx-slide" data-fx="slide">
+      <div class="slide-header"><span class="slide-num">05</span><span class="slide-title-en">MARKETING · 숏폼 마케팅</span></div>
+      <div class="container anim">
+        <h2>유저 공감형 빌드업 — 인스타그램 릴스</h2>
+        <div class="subtitle">광고가 아닌 '브이로그' 톤으로 출시 전 팬덤 확보</div>
+        <div class="reels-timeline stagger">
+          <div class="reel-card">
+            <div class="reel-thumb">📹</div>
+            <div class="info">
+              <div class="ep">PROLOGUE</div>
+              <div class="ttl">팀 소개</div>
+              <div class="desc">"20대 돈 없는 백수 넷이 모이면…" 바이브 코딩 밈 활용</div>
+            </div>
+          </div>
+          <div class="reel-card">
+            <div class="reel-thumb">📱</div>
+            <div class="info">
+              <div class="ep">EP.1</div>
+              <div class="ttl">취향 공유</div>
+              <div class="desc">팀원 휴대폰 케이스 비교, 트렌드 숏폼 구조 차용</div>
+            </div>
+          </div>
+          <div class="reel-card">
+            <div class="reel-thumb">💻</div>
+            <div class="info">
+              <div class="ep">EP.2</div>
+              <div class="ttl">제작 과정</div>
+              <div class="desc">"여러분 저희 했어요!!!" 실제 작업 화면 노출</div>
+            </div>
+          </div>
+          <div class="reel-card">
+            <div class="reel-thumb">🐟</div>
+            <div class="info">
+              <div class="ep">EP.3</div>
+              <div class="ttl">자린이 공개</div>
+              <div class="desc">소심하게 숨은 첫 등장, 짠하지만 귀여운 캐릭터 브랜딩</div>
+            </div>
+          </div>
+          <div class="reel-card">
+            <div class="reel-thumb">🎬</div>
+            <div class="info">
+              <div class="ep">EP.4</div>
+              <div class="ttl">자린이 일기</div>
+              <div class="desc">백수 기상·당근거래·인형뽑기 — 현실 공감 브이로그</div>
+            </div>
+          </div>
+        </div>
+        <div class="card-grid cols-3" style="margin-top: 1.5em;">
+          <div class="card tinted">
+            <h4>🎯 페르소나 전면 배치</h4>
+            <p style="font-size: 0.9rem;">'돈 없는 백수 4명'이라는 날것의 설정으로 타겟층 공감 유도</p>
+          </div>
+          <div class="card tinted">
+            <h4>📈 시리즈형 구조</h4>
+            <p style="font-size: 0.9rem;">EP 시리즈로 연결감 유지, 다음 콘텐츠 예고로 팔로우 전환</p>
+          </div>
+          <div class="card tinted">
+            <h4>💚 캐릭터 팬덤</h4>
+            <p style="font-size: 0.9rem;">앱 출시 전부터 자린이 캐릭터에 대한 호감과 팔로우 선확보</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== SLIDE 15: CONCLUSION ========== -->
+    <section class="slide fx-zoom" data-fx="zoom">
+      <div class="slide-header"><span class="slide-num">06</span><span class="slide-title-en">CONCLUSION · 결론·향후 계획</span></div>
+      <div class="container anim">
+        <h2 style="text-align:center;">절약은 부담이 아닌 <span class="accent">생활 문화</span>가 된다</h2>
+        <div class="subtitle" style="text-align:center;">자린고비가 만드는 라이프스타일 절약 플랫폼의 확장성</div>
+
+        <div class="card-grid cols-3 stagger" style="margin-top: 2em;">
+          <div class="card green">
+            <h3 style="color: var(--brown-dark);">🎯 성공 요인</h3>
+            <ul style="margin-top: 10px; padding-left: 18px; font-size: 0.95rem;">
+              <li>서민 감성 유머 캐릭터</li>
+              <li>즉각적 보상 체계</li>
+              <li>숏폼 공감형 마케팅</li>
+              <li>런칭 전 유저 락인 확보</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>🎨 디자인 확장</h3>
+            <ul style="margin-top: 10px; padding-left: 18px; font-size: 0.95rem;">
+              <li>AI 파이프라인 정교화</li>
+              <li>시즌별 한정판 아이템</li>
+              <li>방 꾸미기 테마 확장</li>
+              <li>의상 컬렉션 추가</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>🚀 기능 확장</h3>
+            <ul style="margin-top: 10px; padding-left: 18px; font-size: 0.95rem;">
+              <li>빅데이터 기반 맞춤 솔루션</li>
+              <li>지역 절약 정보 맵 연계</li>
+              <li>실시간 챌린지 방</li>
+              <li>그룹 절약 경쟁 시스템</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="roadmap" style="margin-top: 2em;">
+          <div class="road-step s1">
+            <h4>NOW</h4>
+            <p style="font-size: 0.85rem; margin-top: 6px;">베타 출시<br/>유저 락인</p>
+          </div>
+          <div class="road-step s2">
+            <h4 style="color:white;">2026 Q3</h4>
+            <p style="font-size: 0.85rem; margin-top: 6px;">시즌 아이템<br/>커뮤니티 활성화</p>
+          </div>
+          <div class="road-step s3">
+            <h4 style="color:white;">2026 Q4 →</h4>
+            <p style="font-size: 0.85rem; margin-top: 6px;">맞춤 솔루션<br/>지역 맵 연계<br/>그룹 챌린지</p>
+          </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 2em;">
+          <h2 style="font-size: 2rem;">감사합니다 🐟</h2>
+          <p style="color: var(--brown); margin-top: 6px;">자린고비 팀 · 서지원 · 박민주 · 강양정 · 박효은</p>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Navigation -->
+  <div class="nav">
+    <button id="prev">‹</button>
+    <div class="indicator" id="indicator">1 / 15</div>
+    <button id="next">›</button>
+  </div>
+  <div class="hint" id="hint">← → 키로 슬라이드 이동</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  let current = 0;
+  const indicator = document.getElementById('indicator');
+  const progress = document.getElementById('progress');
+  const hint = document.getElementById('hint');
+
+  function showSlide(idx) {
+    slides.forEach((s, i) => {
+      s.classList.remove('active', 'prev');
+      if (i < idx) s.classList.add('prev');
+    });
+    slides[idx].classList.add('active');
+    indicator.textContent = (idx + 1) + ' / ' + total;
+    progress.style.width = ((idx + 1) / total * 100) + '%';
+    current = idx;
+  }
+
+  function next() { if (current < total - 1) showSlide(current + 1); }
+  function prev() { if (current > 0) showSlide(current - 1); }
+
+  document.getElementById('next').addEventListener('click', next);
+  document.getElementById('prev').addEventListener('click', prev);
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { e.preventDefault(); next(); }
+    if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); prev(); }
+    if (e.key === 'Home') showSlide(0);
+    if (e.key === 'End') showSlide(total - 1);
+    if (e.key === 'f' || e.key === 'F') {
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+      else document.exitFullscreen();
+    }
+  });
+
+  // Show hint briefly
+  setTimeout(() => {
+    hint.classList.add('show');
+    setTimeout(() => hint.classList.remove('show'), 3500);
+  }, 800);
+
+  // Init
+  showSlide(0);
+  progress.style.width = (1 / total * 100) + '%';
+</script>
+</body>
+</html>
